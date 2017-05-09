@@ -53,6 +53,14 @@ delayDF <- delayDF %>% group_by(month, airline) %>% summarise_each(funs(mean), a
 colnames(delayDF) <- c('Month', 'Airline', 'Average_Arrival_Delay', 'Average_Departure_Delay')
 delayDF <- aggregate(. ~ Month+Airline, data = delayDF, FUN = mean)
 delayDF$nflight <- 0
+
+colnames(airport)[1] <- 'Origin'
+origin_join <- merge(x = flight_2008, y = airport[,c(1,3,6:7)], by = "Origin", all.x = TRUE)
+colnames(airport)[1] <- 'Dest'
+colnames(origin_join)[29:31] <- c("origin_city", "origin_lat", "origin_long")
+dest_join <- merge(x = origin_join, y = airport[,c(1,3,6:7)], by = "Dest", all.x = TRUE)
+colnames(dest_join)[32:34] <- c("destination_city", "dest_lat", "dest_long")
+
 for (airline in unique(dest_join$UniqueCarrier)) {
   for (month in unique(dest_join$Month)) {
     delayDF[delayDF$Month==month & delayDF$Airline==airline,]$nflight <- dim(dest_join[dest_join$UniqueCarrier==airline & dest_join$Month==month,])[1]
@@ -65,12 +73,6 @@ cancelDF <- data.frame("month"=flight_2008$Month, "airline"=flight_2008$UniqueCa
 cancelDF <- cancelDF %>% group_by(airline, month) %>% summarise_each(funs(mean), CarrierDelay, WeatherDelay, NASDelay, SecurityDelay, LateAircraftDelay)
 ############
 
-colnames(airport)[1] <- 'Origin'
-origin_join <- merge(x = flight_2008, y = airport[,c(1,3,6:7)], by = "Origin", all.x = TRUE)
-colnames(airport)[1] <- 'Dest'
-colnames(origin_join)[29:31] <- c("origin_city", "origin_lat", "origin_long")
-dest_join <- merge(x = origin_join, y = airport[,c(1,3,6:7)], by = "Dest", all.x = TRUE)
-colnames(dest_join)[32:34] <- c("destination_city", "dest_lat", "dest_long")
 
 original_places <- levels(dest_join$Origin)
 duc <- unique(dest_join$UniqueCarrier)
