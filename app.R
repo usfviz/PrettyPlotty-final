@@ -77,6 +77,7 @@ dest_join <- merge(x = origin_join, y = airport[,c(1,3,6:7)], by = "Dest", all.x
 colnames(dest_join)[32:34] <- c("destination_city", "dest_lat", "dest_long")
 
 original_places <- levels(dest_join$Origin)
+duc <- unique(dest_join$UniqueCarrier)
 
 ui <- fluidPage(
   headerPanel('Flight data'),
@@ -86,7 +87,7 @@ ui <- fluidPage(
     conditionalPanel(condition = "input.conditionedPanels == 2",
                      #selectInput("origin","Origin",choices = original_places),
                      textInput("origin", "Airport Code (eg SFO)", value = ""),
-                     selectInput("map_airline", "Select Airline", choices = unique(dest_join$UniqueCarrier)),
+                     selectInput("map_airline", "Select Airline", choices = duc),
                      selectInput("month_2","departure month",choices = list("January"=1, "February"=2, "March"=3, "April"=4, 
                                                                             "May"=5, "June"=6, "July"=7, "August"=8, "September"=9, 
                                                                             "October"=10, "November"=11, "December"=12)),
