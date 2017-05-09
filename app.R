@@ -1,26 +1,22 @@
-if (!require("plotly")) {install.packages("plotly")}
+packageList = c('plotly', 'ggvis', 'shiny', 'ggmap', 'ggrepel', 'dplyr', 'plyt', 'devtools', 'jsonlite', 'networkD3', 'googleVis')
+for (i in 1:length(packageList)) {
+  if(! is.element(packageList[i],installed.packages()[,1])) {
+    install.packages(packageList[i])
+  }
+}
+
 library(plotly)
-if (!require("ggvis")) {install.packages("ggvis")}
 library(ggvis)
-if (!require("shiny")) {install.packages("shiny")}
 library(shiny)
-if (!require("ggmap")) {install.packages("ggmap")}
 library(ggmap)
-if (!require("ggrepel")) {install.packages("ggrepel")}
 library(ggrepel)
-if (!require("dplyr")) {install.packages("dplyr")}
 library(dplyr)
-if (!require("plyr")) {install.packages("plyr")}
 library(plyr)
-if (!require("devtools")) {install.packages("devtools")}
 library(devtools)
-install_github('ramnathv/rCharts')
+install_github('ramnathv/rCharts', force = TRUE)
 library(rCharts)
-if (!require("jsonlite")) {install.packages("jsonlite")}
 library(jsonlite)
-if (!require("networkD3")) {install.packages("networkD3")}
 library(networkD3)
-if (!require("googleVis")) {install.packages("googleVis")}
 library(googleVis)
 
 flight_2008 <- read.csv(unz("new_2008.csv.zip", "new_2008.csv"))
