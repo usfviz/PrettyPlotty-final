@@ -1,4 +1,4 @@
-packageList = c('plotly', 'ggvis', 'shiny', 'ggmap', 'ggrepel', 'dplyr', 'plyt', 'devtools', 'jsonlite', 'networkD3', 'googleVis')
+packageList = c('plotly', 'ggvis', 'shiny', 'ggmap', 'ggrepel', 'dplyr', 'plyr', 'devtools', 'jsonlite', 'networkD3', 'googleVis')
 for (i in 1:length(packageList)) {
   if(! is.element(packageList[i],installed.packages()[,1])) {
     install.packages(packageList[i])
