@@ -204,8 +204,8 @@ server <- function(input, output) {
     ####### source/target #######
     may <- dest_join[dest_join$Month == input$num1 & dest_join$DayofMonth ==input$num2,]
     #may <- dest_join[dest_join$Month == 5 &dest_join$DayofMonth ==1,]
-    may_count <- count(may,var = c("Origin","UniqueCarrier"))
-    origin_count <- count(may,vars = c("Origin"))
+    may_count <- plyr::count(may, c('Origin','UniqueCarrier'))
+    origin_count <- plyr::count(may,vars = c("Origin"))
     selected_origin <- origin_count[origin_count$freq>50,]$Origin
     may_count <- may_count[may_count$Origin%in%selected_origin,]
     colnames(may_count) <- c('source','target','value')
