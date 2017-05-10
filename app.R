@@ -1,26 +1,22 @@
-if (!require("plotly")) {install.packages("plotly")}
+packageList = c('plotly', 'ggvis', 'shiny', 'ggmap', 'ggrepel', 'dplyr', 'plyr', 'devtools', 'jsonlite', 'networkD3', 'googleVis')
+for (i in 1:length(packageList)) {
+  if(! is.element(packageList[i],installed.packages()[,1])) {
+    install.packages(packageList[i])
+  }
+}
+
 library(plotly)
-if (!require("ggvis")) {install.packages("ggvis")}
 library(ggvis)
-if (!require("shiny")) {install.packages("shiny")}
 library(shiny)
-if (!require("ggmap")) {install.packages("ggmap")}
 library(ggmap)
-if (!require("ggrepel")) {install.packages("ggrepel")}
 library(ggrepel)
-if (!require("dplyr")) {install.packages("dplyr")}
 library(dplyr)
-if (!require("plyr")) {install.packages("plyr")}
 library(plyr)
-if (!require("devtools")) {install.packages("devtools")}
 library(devtools)
-install_github('ramnathv/rCharts')
+install_github('ramnathv/rCharts', force = TRUE)
 library(rCharts)
-if (!require("jsonlite")) {install.packages("jsonlite")}
 library(jsonlite)
-if (!require("networkD3")) {install.packages("networkD3")}
 library(networkD3)
-if (!require("googleVis")) {install.packages("googleVis")}
 library(googleVis)
 
 flight_2008 <- read.csv(unz("new_2008.csv.zip", "new_2008.csv"))
@@ -57,7 +53,15 @@ delayDF <- delayDF %>% group_by(month, airline) %>% summarise_each(funs(mean), a
 colnames(delayDF) <- c('Month', 'Airline', 'Average_Arrival_Delay', 'Average_Departure_Delay')
 delayDF <- aggregate(. ~ Month+Airline, data = delayDF, FUN = mean)
 delayDF$nflight <- 0
-for (airline in unique(dest_join$UniqueCarrier)) {
+
+colnames(airport)[1] <- 'Origin'
+origin_join <- merge(x = flight_2008, y = airport[,c(1,3,6:7)], by = "Origin", all.x = TRUE)
+colnames(airport)[1] <- 'Dest'
+colnames(origin_join)[29:31] <- c("origin_city", "origin_lat", "origin_long")
+dest_join <- merge(x = origin_join, y = airport[,c(1,3,6:7)], by = "Dest", all.x = TRUE)
+colnames(dest_join)[32:34] <- c("destination_city", "dest_lat", "dest_long")
+
+for (airline in unique(dest_join$UniqueCarrier)[unique(dest_join$UniqueCarrier)!="Aloha"]) {
   for (month in unique(dest_join$Month)) {
     delayDF[delayDF$Month==month & delayDF$Airline==airline,]$nflight <- dim(dest_join[dest_join$UniqueCarrier==airline & dest_join$Month==month,])[1]
   }
@@ -69,12 +73,6 @@ cancelDF <- data.frame("month"=flight_2008$Month, "airline"=flight_2008$UniqueCa
 cancelDF <- cancelDF %>% group_by(airline, month) %>% summarise_each(funs(mean), CarrierDelay, WeatherDelay, NASDelay, SecurityDelay, LateAircraftDelay)
 ############
 
-colnames(airport)[1] <- 'Origin'
-origin_join <- merge(x = flight_2008, y = airport[,c(1,3,6:7)], by = "Origin", all.x = TRUE)
-colnames(airport)[1] <- 'Dest'
-colnames(origin_join)[29:31] <- c("origin_city", "origin_lat", "origin_long")
-dest_join <- merge(x = origin_join, y = airport[,c(1,3,6:7)], by = "Dest", all.x = TRUE)
-colnames(dest_join)[32:34] <- c("destination_city", "dest_lat", "dest_long")
 
 original_places <- levels(dest_join$Origin)
 
@@ -206,8 +204,8 @@ server <- function(input, output) {
     ####### source/target #######
     may <- dest_join[dest_join$Month == input$num1 & dest_join$DayofMonth ==input$num2,]
     #may <- dest_join[dest_join$Month == 5 &dest_join$DayofMonth ==1,]
-    may_count <- count(may,var = c("Origin","UniqueCarrier"))
-    origin_count <- count(may,vars = c("Origin"))
+    may_count <- plyr::count(may, c('Origin','UniqueCarrier'))
+    origin_count <- plyr::count(may,vars = c("Origin"))
     selected_origin <- origin_count[origin_count$freq>50,]$Origin
     may_count <- may_count[may_count$Origin%in%selected_origin,]
     colnames(may_count) <- c('source','target','value')
